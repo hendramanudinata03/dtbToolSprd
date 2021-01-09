@@ -75,7 +75,7 @@ struct chipInfo_t {
 
 struct chipInfo_t *chip_list;
 
-char *input_dir;
+char  input_dir[512];
 char *output_file;
 char *dtc_path;
 int   verbose;
@@ -111,7 +111,7 @@ int parse_commandline(int argc, char *const argv[])
         switch (c) {
         case 1:
             if (!input_dir)
-                input_dir = optarg;
+                strncpy(input_dir, optarg, 511);
             break;
         case 'o':
             output_file = optarg;
@@ -141,7 +141,7 @@ int parse_commandline(int argc, char *const argv[])
     }
 
     if (!input_dir)
-        input_dir = "./";
+        strncpy(input_dir, "./", 511);
 
     if (!dtc_path)
         dtc_path = "";
@@ -234,7 +234,7 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
         return NULL;
     }
 
-    llen = sizeof(char) * (strlen(dtc_path) +
+    llen = sizeof(char) * (strlen(dtc_path) + 1 +
                            strlen(str1) +
                            strlen(str2) +
                            strlen(filename) + 1);
@@ -246,6 +246,7 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
     }
 
     strncpy(buf, dtc_path, llen);
+    strncat(buf, "/", llen);
     strncat(buf, str1, llen);
     strncat(buf, filename, llen);
     strncat(buf, str2, llen);
@@ -354,6 +355,9 @@ int main(int argc, char **argv)
 
     log_info("  Input directory: '%s'\n", input_dir);
     log_info("  Output file: '%s'\n", output_file);
+
+    /* Ensure input_dir ends with / */
+    strncat(input_dir, "/", 511);
 
     DIR *dir = opendir(input_dir);
     if (!dir) {
