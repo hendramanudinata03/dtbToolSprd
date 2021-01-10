@@ -75,7 +75,7 @@ struct chipInfo_t {
 
 struct chipInfo_t *chip_list;
 
-char  input_dir[512];
+char  input_dir[512] = "\0";
 char *output_file;
 char *dtc_path;
 int   verbose;
@@ -110,7 +110,7 @@ int parse_commandline(int argc, char *const argv[])
            != -1) {
         switch (c) {
         case 1:
-            if (!input_dir)
+            if (strlen(input_dir) == 0)
                 strncpy(input_dir, optarg, 511);
             break;
         case 'o':
@@ -140,7 +140,7 @@ int parse_commandline(int argc, char *const argv[])
         return RC_ERROR;
     }
 
-    if (!input_dir)
+    if (strlen(input_dir) == 0)
         strncpy(input_dir, "./", 511);
 
     if (!dtc_path)
