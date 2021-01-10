@@ -75,9 +75,9 @@ struct chipInfo_t {
 
 struct chipInfo_t *chip_list;
 
-char  input_dir[512] = "\0";
+char  input_dir[512] = "";
 char *output_file;
-char *dtc_path;
+char  dtc_path[512] = "";
 int   verbose;
 int   page_size = PAGE_SIZE_DEF;
 
@@ -117,7 +117,8 @@ int parse_commandline(int argc, char *const argv[])
             output_file = optarg;
             break;
         case 'p':
-            dtc_path = optarg;
+            strncpy(dtc_path, optarg, 511);
+            strncat(dtc_path, "/", 511-strlen(dtc_path));
             break;
         case 's':
             page_size = atoi(optarg);
@@ -142,9 +143,6 @@ int parse_commandline(int argc, char *const argv[])
 
     if (strlen(input_dir) == 0)
         strncpy(input_dir, "./", 511);
-
-    if (!dtc_path)
-        dtc_path = "";
 
     return RC_SUCCESS;
 }
@@ -234,7 +232,7 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
         return NULL;
     }
 
-    llen = sizeof(char) * (strlen(dtc_path) + 1 +
+    llen = sizeof(char) * (strlen(dtc_path) +
                            strlen(str1) +
                            strlen(str2) +
                            strlen(filename) + 1);
@@ -246,7 +244,6 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
     }
 
     strncpy(buf, dtc_path, llen);
-    strncat(buf, "/", llen);
     strncat(buf, str1, llen);
     strncat(buf, filename, llen);
     strncat(buf, str2, llen);
@@ -357,8 +354,7 @@ int main(int argc, char **argv)
     log_info("  Output file: '%s'\n", output_file);
 
     /* Ensure input_dir ends with / */
-    strncat(input_dir, "/", 511);
-
+    strncat(input_dir, "/", 511-strlen(input_dir));
     DIR *dir = opendir(input_dir);
     if (!dir) {
         log_err("Failed to open input directory '%s'\n", input_dir);
