@@ -40,12 +40,10 @@
 #include <errno.h>
 #include <unistd.h>
 
-//#define QCDT_MAGIC     "QCDT"  /* Master DTB magic */
-#define QCDT_MAGIC     "SPRD"  /* Master DTB magic */
-#define QCDT_VERSION   1       /* QCDT version */
+#define SPRD_MAGIC     "SPRD"  /* Master DTB magic */
+#define SPRD_VERSION   1       /* SPRD version */
 
-//#define QCDT_DT_TAG    "qcom,msm-id = <"
-#define QCDT_DT_TAG    "sprd,sc-id = <"
+#define SPRD_DT_TAG    "sprd,sc-id = <"
 
 #define PAGE_SIZE_DEF  2048
 #define PAGE_SIZE_MAX  (1024*1024)
@@ -208,8 +206,8 @@ void chip_deleteall()
     }
 }
 
-/* Extract 'qcom,msm-id' parameter triplet from DTB
-      qcom,msm-id = <x y z>;
+/* Extract 'sprd,sc-id' parameter triplet from DTB
+      sprd,sc-id = <x y z>;
  */
 struct chipInfo_t *getChipInfo(const char *filename, int *num)
 {
@@ -254,10 +252,10 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
     if (pfile == NULL) {
         log_err("... skip, fail to decompile dtb\n");
     } else {
-        /* Find "qcom,msm-id" */
+        /* Find "sprd,sc-id" */
         while ((llen = getline(&line, &line_size, pfile)) != -1) {
-            if ((pos = strstr(line, QCDT_DT_TAG)) != NULL) {
-                pos += strlen(QCDT_DT_TAG);
+            if ((pos = strstr(line, SPRD_DT_TAG)) != NULL) {
+                pos += strlen(SPRD_DT_TAG);
 
                 entryEnded = 0;
                 while (1) {
@@ -310,7 +308,7 @@ struct chipInfo_t *getChipInfo(const char *filename, int *num)
                     }
                 }
 
-                log_err("... skip, incorrect '%s' format\n", QCDT_DT_TAG);
+                log_err("... skip, incorrect '%s' format\n", SPRD_DT_TAG);
                 break;
             }
         }
@@ -339,7 +337,7 @@ int main(int argc, char **argv)
     int dtb_count = 0, dtb_offset = 0;
     size_t wrote = 0, expected = 0;
     struct stat st;
-    uint32_t version = QCDT_VERSION;
+    uint32_t version = SPRD_VERSION;
     int num;
     uint32_t dtb_size;
 
@@ -370,7 +368,7 @@ int main(int argc, char **argv)
     memset(filler, 0, page_size);
 
     /* Open the .dtb files in the specified path, decompile and
-       extract "qcom,msm-id" parameter
+       extract "sprd,sc-id" parameter
      */
     while ((dp = readdir(dir)) != NULL) {
         if (dp->d_type == DT_REG) {
@@ -393,7 +391,7 @@ int main(int argc, char **argv)
                 chip = getChipInfo(filename, &num);
                 if (!chip) {
                     log_err("skip, failed to scan for '%s' tag\n",
-                            QCDT_DT_TAG);
+                            SPRD_DT_TAG);
                     free(filename);
                     continue;
                 }
@@ -461,7 +459,7 @@ int main(int argc, char **argv)
     }
 
     /* Write header info */
-    wrote += write(out_fd, QCDT_MAGIC, sizeof(uint8_t) * 4); /* magic */
+    wrote += write(out_fd, SPRD_MAGIC, sizeof(uint8_t) * 4); /* magic */
     wrote += write(out_fd, &version, sizeof(uint32_t));      /* version */
     wrote += write(out_fd, (uint32_t *)&dtb_count, sizeof(uint32_t));
                                                              /* #DTB */
