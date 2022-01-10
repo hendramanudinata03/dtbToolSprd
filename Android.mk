@@ -6,9 +6,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	dtbtool.c
 
-LOCAL_CFLAGS += \
-	-Wall
-
 LOCAL_MODULE := dtbToolSprd
 LOCAL_MODULE_TAGS := optional
 
